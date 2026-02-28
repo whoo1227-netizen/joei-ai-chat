@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>喬薏娛樂 | AI 高情商回覆產生器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-pink: #ffafbd;
+            --soft-pink: #fff5f7;
+            --border-pink: #ffcad4;
+        }
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--soft-pink);
+            overscroll-behavior: none;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid var(--border-pink);
+            box-shadow: 0 10px 25px rgba(255, 182, 193, 0.3);
+            border-radius: 24px;
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #ffafbd 0%, #ffc3a0 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-gradient:active {
+            transform: scale(0.98);
+            filter: brightness(0.9);
+        }
+        .reply-item {
+            animation: fadeIn 0.4s ease-out forwards;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border-pink); border-radius: 10px; }
+        
+        /* Loading Animation */
+        .dot-flashing {
+            position: relative;
+            width: 10px;
+            height: 10px;
+            border-radius: 5px;
+            background-color: #ffafbd;
+            color: #ffafbd;
+            animation: dot-flashing 1s infinite linear alternate;
+            animation-delay: .5s;
+        }
+        .dot-flashing::before, .dot-flashing::after {
+            content: '';
+            display: inline-block;
+            position: absolute;
+            top: 0;
+        }
+        .dot-flashing::before {
+            left: -15px;
+            width: 10px;
+            height: 10px;
+            border-radius: 5px;
+            background-color: #ffafbd;
+            color: #ffafbd;
+            animation: dot-flashing 1s infinite linear alternate;
+            animation-delay: 0s;
+        }
+        .dot-flashing::after {
+            left: 15px;
+            width: 10px;
+            height: 10px;
+            border-radius: 5px;
+            background-color: #ffafbd;
+            color: #ffafbd;
+            animation: dot-flashing 1s infinite linear alternate;
+            animation-delay: 1s;
+        }
+        @keyframes dot-flashing {
+            0% { background-color: #ffafbd; }
+            50%, 100% { background-color: #ebe6ff; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <!-- Header Area -->
+    <header class="w-full max-w-md text-center mb-6 mt-2">
+        <div class="inline-block p-2 bg-white rounded-full shadow-sm mb-3">
+            <span class="text-2xl">💍</span>
+        </div>
+        <h1 class="text-2xl font-bold text-pink-600 tracking-wider">喬薏 AI 聊天導師</h1>
+        <p class="text-pink-400 text-xs mt-1 uppercase tracking-widest font-medium">JOEI AI Intelligence v2.0</p>
+    </header>
+
+    <!-- Main Container -->
+    <main class="w-full max-w-md glass-card p-6 shadow-2xl">
+        
+        <!-- Input Section -->
+        <div class="mb-4">
+            <label class="block text-pink-600 font-bold text-sm mb-2 ml-1">💌 貼上男方訊息：</label>
+            <textarea id="userInput" rows="3" class="w-full p-4 border-2 border-pink-50 rounded-2xl focus:outline-none focus:border-pink-200 transition-all text-gray-700 bg-pink-50/30 placeholder-pink-200 text-sm" placeholder="複製訊息貼到這裡，AI 將為妳量身打造神回覆..."></textarea>
+        </div>
+
+        <!-- Strategy Options -->
+        <div class="grid grid-cols-2 gap-3 mb-5">
+            <div class="relative">
+                <label class="block text-pink-500 text-[10px] font-bold absolute -top-2 left-3 bg-white px-1">選擇人設</label>
+                <select id="persona" class="w-full p-3 border border-pink-100 rounded-xl text-gray-600 text-sm focus:outline-none bg-white shadow-sm appearance-none">
+                    <option value="sweet">🍬 甜美可愛 (妹妹型)</option>
+                    <option value="mature">🍷 成熟御姐 (知性型)</option>
+                    <option value="humor">🎨 幽默大方 (有趣型)</option>
+                    <option value="cool">❄️ 氣質高冷 (女神型)</option>
+                </select>
+            </div>
+            <div class="relative">
+                <label class="block text-pink-500 text-[10px] font-bold absolute -top-2 left-3 bg-white px-1">選擇場景</label>
+                <select id="scene" class="w-full p-3 border border-pink-100 rounded-xl text-gray-600 text-sm focus:outline-none bg-white shadow-sm appearance-none">
+                    <option value="breakIce">初次破冰</option>
+                    <option value="hot">曖昧升溫</option>
+                    <option value="comfort">情緒安慰</option>
+                    <option value="decline">委婉拒絕</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Action Button -->
+        <button id="generateBtn" onclick="handleGenerate()" class="w-full btn-gradient text-white font-bold py-4 rounded-2xl mb-6 shadow-md text-lg flex items-center justify-center gap-2">
+            <span id="btnIcon">✨</span> <span id="btnText">AI 生成靈感回覆</span>
+        </button>
+
+        <!-- Loading State -->
+        <div id="loadingArea" class="hidden flex flex-col items-center py-8">
+            <div class="dot-flashing"></div>
+            <p class="text-pink-400 text-xs mt-6">AI 正在讀取對方心思中...</p>
+        </div>
+
+        <!-- Result Section -->
+        <div id="resultContainer" class="hidden">
+            <div class="flex justify-between items-center mb-3">
+                <label class="text-pink-600 font-bold text-sm ml-1">💡 專屬建議 (點擊即可複製)：</label>
+                <span class="text-[10px] text-pink-300">每一條都是唯一生成</span>
+            </div>
+            <div id="replyList" class="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-1">
+                <!-- Data Injection -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-8 text-center w-full">
+        <div class="h-[1px] w-12 bg-pink-200 mx-auto mb-4"></div>
+        <p class="text-pink-300 text-[10px] leading-loose tracking-widest">
+            版權歸喬薏娛樂有限公司所有<br>
+            JOEI ENTERTAINMENT CO., LTD.<br>
+            <span class="font-bold text-pink-400">翻印 (盜拷) 必究 © 2026</span>
+        </p>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-12 bg-black/70 backdrop-blur-md text-white px-6 py-2 rounded-full text-xs opacity-0 transition-opacity duration-300 pointer-events-none z-50">
+        已複製到剪貼簿 ✨
+    </div>
+
+    <script>
+        const apiKey = ""; // API key will be provided at runtime
+
+        async function handleGenerate() {
+            const userInput = document.getElementById('userInput').value;
+            const persona = document.getElementById('persona').options[document.getElementById('persona').selectedIndex].text;
+            const scene = document.getElementById('scene').options[document.getElementById('scene').selectedIndex].text;
+            
+            if (!userInput.trim()) {
+                showToast("請先輸入訊息喔！");
+                return;
+            }
+
+            // UI State Change
+            toggleLoading(true);
+
+            try {
+                const systemPrompt = `你是一位專業的社交心理顧問與聊天導師，專門協助陪聊師與直播主回覆男性的訊息。
+                你的目標是：
+                1. 提供極高的人性化情緒價值。
+                2. 根據當下情境提供5條「完全不同、非罐頭化」的回覆。
+                3. 每條回覆必須包含：情緒認同、適度推拉、以及一個能讓對方繼續接話的開放式問題。
+                4. 必須嚴格遵守選定的人設：${persona}，以及當前場景：${scene}。
+                5. 回覆要自然，像真實女性在社交軟體（如JD, SUGO, 探探）上的對話風格。
+                請以 JSON 格式回覆，格式為：{"replies": ["回覆1", "回覆2", "回覆3", "回覆4", "回覆5"]}`;
+
+                const userQuery = `對方說了這句話：「${userInput}」。請根據當前的人設與場景，生成5條讓人心動的神回覆。`;
+
+                const response = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: userQuery }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                        generationConfig: { 
+                            responseMimeType: "application/json",
+                            responseSchema: {
+                                type: "OBJECT",
+                                properties: {
+                                    replies: { type: "ARRAY", items: { type: "string" } }
+                                }
+                            }
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                const result = JSON.parse(data.candidates[0].content.parts[0].text);
+                displayReplies(result.replies);
+
+            } catch (error) {
+                console.error(error);
+                showToast("AI 思考超時，請再試一次");
+            } finally {
+                toggleLoading(false);
+            }
+        }
+
+        async function fetchWithRetry(url, options, retries = 5, backoff = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok) return response;
+                } catch (err) {}
+                await new Promise(resolve => setTimeout(resolve, backoff));
+                backoff *= 2;
+            }
+            throw new Error('All retries failed');
+        }
+
+        function displayReplies(replies) {
+            const container = document.getElementById('resultContainer');
+            const list = document.getElementById('replyList');
+            container.classList.remove('hidden');
+            list.innerHTML = '';
+
+            replies.forEach((text, index) => {
+                const div = document.createElement('div');
+                div.className = "reply-item bg-white p-4 rounded-2xl border border-pink-100 shadow-sm active:bg-pink-50 transition-all flex justify-between items-center group cursor-pointer";
+                div.style.animationDelay = `${index * 0.1}s`;
+                div.innerHTML = `
+                    <span class="text-gray-700 text-sm leading-relaxed flex-1 pr-4">${text}</span>
+                    <div class="bg-pink-100 text-pink-500 text-[10px] px-2 py-1 rounded-md font-bold shrink-0">複製</div>
+                `;
+                div.onclick = () => copyText(text);
+                list.appendChild(div);
+            });
+            
+            // Scroll to results
+            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function toggleLoading(isLoading) {
+            const btn = document.getElementById('generateBtn');
+            const loading = document.getElementById('loadingArea');
+            const result = document.getElementById('resultContainer');
+            
+            if (isLoading) {
+                btn.disabled = true;
+                btn.classList.add('opacity-50');
+                loading.classList.remove('hidden');
+                result.classList.add('hidden');
+            } else {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+                loading.classList.add('hidden');
+            }
+        }
+
+        function copyText(text) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast("已複製到剪貼簿 ✨");
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
